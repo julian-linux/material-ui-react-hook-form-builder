@@ -1,10 +1,27 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-import { ExampleComponent } from 'material-ui-react-hook-form-builder'
-import 'material-ui-react-hook-form-builder/dist/index.css'
+import BuildForm from 'material-ui-react-hook-form-builder'
+ 
+import config from './config'
 
 const App = () => {
-  return <ExampleComponent text="Create React Library Example 😄" />
+  const [formData] = useState(() => {
+    const data = Object.assign({}, config);
+    return data;
+  });
+
+  const handleSubmit = (formData) => {
+    console.log('formData',formData)
+  }
+
+  return (
+  <BuildForm 
+    config={formData}
+    onSubmit={handleSubmit}
+    loading={false}
+    submitErrors={{}}
+  />
+  )
 }
 
 export default App
