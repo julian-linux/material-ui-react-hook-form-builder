@@ -23,10 +23,10 @@ const CommonFormRadio = ({
   required,
   items,
   helpText,
+  className
 }) => {
   const id = `radio-${idx}-${label || name}`;
 
-  const classes = {};
   const [inputValue, setInputValue] = useState(value);
 
   const handleChange = (evt) => {
@@ -47,7 +47,7 @@ const CommonFormRadio = ({
   }, [name, setValue, inputValue]); // If an re-render has a new value
 
   return (
-    <FormControl component="fieldset" className={classes.formControl} id={id} error={!!errors[name]}>
+    <FormControl component="fieldset" className={className} id={id} error={!!errors[name]}>
       <FormLabel component="legend">{label}</FormLabel>
       <RadioGroup aria-label={name} name={name} value={inputValue} onChange={handleChange}>
         {map(items, (item, key) => (
@@ -61,6 +61,7 @@ const CommonFormRadio = ({
 };
 
 CommonFormRadio.propTypes = {
+  className: PropTypes.string,
   items: PropTypes.arrayOf(PropTypes.shape({
     label: PropTypes.string,
     value: PropTypes.any,
@@ -68,6 +69,7 @@ CommonFormRadio.propTypes = {
 };
 
 CommonFormRadio.defaultProps = {
+  className: '',
   errors: {},
   value: null,
 };

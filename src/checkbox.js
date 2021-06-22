@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 // Material Components
 import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
+
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -13,11 +13,12 @@ import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
+
 // Styles
 import useStyles from './styles';
 
 const CommonFormCheckbox = ({
-  name, register, setValue, errors, label, value, text, onChange, required,
+  name, register, setValue, errors, label, value, onChange, required,
 }) => {
   const classes = useStyles();
   const [checkboxChecked, setCheckboxChecked] = useState(!!value);
@@ -53,7 +54,6 @@ const CommonFormCheckbox = ({
           )}
         label={label}
       />
-      {text && (<Typography variant="caption" style={{ marginLeft: '8px' }}>{text}</Typography>)}
       {errors && errors[name] && <FormHelperText error>{errors[name].message}</FormHelperText>}
 
     </Box>
@@ -68,7 +68,6 @@ CommonFormCheckbox.propTypes = {
   register: PropTypes.func,
   setValue: PropTypes.func,
   value: PropTypes.bool,
-  text: PropTypes.string,
   onChange: PropTypes.func,
   required: PropTypes.bool,
 };
@@ -79,7 +78,6 @@ CommonFormCheckbox.defaultProps = {
   setValue: () => {},
   label: '',
   value: false,
-  text: '',
   onChange: () => {},
   required: false,
 };

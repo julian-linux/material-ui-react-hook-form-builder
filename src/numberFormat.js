@@ -37,4 +37,4 @@ const CommonNumberFormat = (props) => (
   />
 );
 
-export default CommonNumberFormat;
+export default React.memo(CommonNumberFormat);

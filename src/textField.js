@@ -1,5 +1,5 @@
 // Libraries
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 
@@ -10,9 +10,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 // Icons
 import Error from '@material-ui/icons/Error';
-
-// Styles
-import useStyles from './styles';
 
 const CommonFormTextField = ({
   name,
@@ -34,15 +31,14 @@ const CommonFormTextField = ({
   error,
   ...props
 }) => {
-  const classes = useStyles();
   const [inputValue, setInputValue] = useState(value || '');
 
-  const handleChange = (evt) => {
+  const handleChange = useCallback((evt) => {
     setInputValue(evt.target.value);
     if (onChange) {
       onChange(evt.target.value, getValues);
     }
-  };
+  }, [onChange, getValues]);
 
   useEffect(() => {
     register && register({ name, required });
@@ -64,14 +60,13 @@ const CommonFormTextField = ({
       value={inputValue}
       onChange={handleChange}
       fullWidth
-      className={clsx(classes.textField, className)}
+      className={className}
       error={error || !!errors[name]}
       helperText={(errors[name] && errors[name].message) || helpText}
       label={label || name}
       name={name}
       type={type}
       disabled={disabled}
-      size="small"
       inputProps={{
         ...inputProps,
         'aria-label': inputProps && inputProps['aria-label'] ? inputProps['aria-label'] : name,

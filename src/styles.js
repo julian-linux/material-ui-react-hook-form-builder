@@ -7,7 +7,7 @@ export default makeStyles((theme) => ({
   textField: {
     marginBottom: theme.spacing(2),
     '& label': {
-      marginLeft: theme.spacing(3),
+      // marginLeft: theme.spacing(3),
       textTransform: 'capitalize',
     },
   },

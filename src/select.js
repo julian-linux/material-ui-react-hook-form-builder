@@ -1,16 +1,20 @@
 // Libraries
-import React, { useState, useEffect } from 'react';
+import React, {
+  useState, useEffect, useCallback, useMemo,
+} from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import map from 'lodash/map';
+import isEmpty from 'lodash/isEmpty';
 
 // Material Components
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import Tooltip from '@material-ui/core/Tooltip';
+import ListItemText from '@material-ui/core/ListItemText';
+import Checkbox from '@material-ui/core/Checkbox';
 
 // Styles
 import { useSelectStyles } from './styles';
@@ -29,44 +33,87 @@ const CommonFormSelect = ({
   loading,
   items,
   icon: Icon,
-  tooltip,
   helpText,
   getValues,
   disabled,
+  multiple,
   defaultSelect
 }) => {
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(multiple ? [] : '');
 
   const classes = useSelectStyles();
   const id = `select-${idx}-${label || name}`;
 
-  const handleChange = (evt) => {
+  const handleChange = useCallback((evt) => {
     setInputValue(evt.target.value);
     setValue(name, evt.target.value);
     if (onChange) {
       onChange(evt.target.value, getValues);
     }
-  };
+  }, [onChange, getValues, name, setValue]);
 
   useEffect(() => {
     register({ name, required });
   }, [name, register, required]);
 
   useEffect(() => {
-    setInputValue(value);
-    setValue(name, value);
-  }, [name, setValue, value]); // If an re-render has a new value
+    let nextValue = value;
+    if (multiple && isEmpty(value)) {
+      nextValue = [];
+    } else if (isEmpty(value)) {
+      nextValue = '';
+    }
+    setInputValue(nextValue);
+    setValue(name, nextValue);
+  }, [name, setValue, value, multiple]); // If an re-render has a new value
 
-  const setItems = () => map(items, (item, itemIdx) => {
-    const selected = item.id === value;
-    return (
-      <MenuItem key={`select-item-${idx}-${itemIdx}`} value={item.id} selected={selected} disabled={item.disabled}>
+  const renderValue = useCallback((selected) => {
+    let selectedItem;
+    if (multiple) {
+      selectedItem = selected.map((itemSelected) => {
+        const item = items.find(({ id }) => id === itemSelected);
+        return item.name || null;
+      });
+
+      if (!isEmpty(selectedItem)) {
+        return selectedItem.join(', ');
+      }
+      return '';
+    }
+
+    selectedItem = items.find(({ id }) => id === selected);
+
+    if (!isEmpty(selectedItem)) {
+      return selectedItem.name;
+    }
+
+    return '';
+  }, [multiple, items]);
+
+  const renderDefaultValue = useMemo(() => !inputValue && (
+    <MenuItem value={inputValue}>
+      <em>{defaultSelect}</em>
+    </MenuItem>
+  ), [inputValue]);
+
+  const renderItems = useMemo(() => {
+    if (multiple) {
+      return items.map((item) => (
+        <MenuItem key={`select-item-${idx}-${item.id}`} value={item.id} disabled={item.disabled}>
+          <Checkbox checked={inputValue && inputValue.includes(item.id)} />
+          <ListItemText primary={item.name} />
+        </MenuItem>
+      ));
+    }
+
+    return items.map((item) => (
+      <MenuItem key={`select-item-${idx}-${item.id}`} value={item.id} selected={item.id === value} disabled={item.disabled}>
         {item.name}
       </MenuItem>
-    );
-  });
+    ));
+  }, [idx, items, value, inputValue, multiple]);
 
-  const formControl = (
+  return (
     <FormControl
       className={clsx(classes.select, className)}
       error={!!errors[name]}
@@ -85,31 +132,20 @@ const CommonFormSelect = ({
           name,
           id: `select-${name}-${idx}`,
         }}
+        input={<Input />}
         size="small"
+        multiple={multiple}
         value={inputValue}
         onChange={handleChange}
+        renderValue={renderValue}
       >
-        {!inputValue && (
-          <MenuItem value={inputValue}>
-            <em>{defaultSelect}</em>
-          </MenuItem>
-        )}
-        {setItems()}
+        {renderDefaultValue}
+        {renderItems}
       </Select>
       {errors[name] && <FormHelperText>{errors[name].message}</FormHelperText>}
       {helpText && !errors[name] && <FormHelperText>{helpText}</FormHelperText>}
     </FormControl>
   );
-
-  const render = tooltip ? (
-    <Tooltip title={tooltip} placement="top">
-      {formControl}
-    </Tooltip>
-  ) : (
-    formControl
-  );
-
-  return render;
 };
 
 CommonFormSelect.propTypes = {
@@ -124,11 +160,12 @@ CommonFormSelect.propTypes = {
   register: PropTypes.func,
   required: PropTypes.bool,
   setValue: PropTypes.func,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  tooltip: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
   helpText: PropTypes.string,
   icon: PropTypes.object,
   disabled: PropTypes.bool,
+  multiple: PropTypes.bool,
+  getValues: PropTypes.func.isRequired,
   defaultSelect: PropTypes.string
 };
 
@@ -148,7 +185,8 @@ CommonFormSelect.defaultProps = {
   helpText: null,
   icon: null,
   disabled: false,
-  defaultSelect: '',
+  multiple: false,
+  defaultSelect: 'Select an Option'
 };
 
-export default CommonFormSelect;
+export default React.memo(CommonFormSelect);
